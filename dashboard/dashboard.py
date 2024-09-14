@@ -8,7 +8,7 @@ sns.set_theme(style='dark')
 
 
 
-all_df = pd.read_csv("main_data.csv")
+all_df = pd.read_csv("dashboard/main_data.csv")
 all_df.reset_index(inplace=True)
 
 datetime_columns = ["order_purchase_timestamp","order_approved_at","order_delivered_carrier_date","order_delivered_customer_date","order_estimated_delivery_date"]
