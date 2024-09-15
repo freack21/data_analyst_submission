@@ -5,8 +5,12 @@ import streamlit as st
 from babel.numbers import format_currency
 sns.set_theme(style='dark')
 
-
-
+st.set_page_config(
+   page_title="Olist E-Commerce Dashboard | Fikri Rivandi - Data Analyst Submission",
+   page_icon="🛍️",
+   layout="wide",
+   initial_sidebar_state="collapsed",
+)
 
 all_df = pd.read_csv("dashboard/main_data.csv")
 all_df.reset_index(inplace=True)
@@ -20,20 +24,27 @@ min_date = all_df["order_purchase_timestamp"].min()
 max_date = all_df["order_purchase_timestamp"].max()
 
 with st.sidebar:
-    st.image("https://innovationsoftheworld.com/wp-content/uploads/2024/01/3f49143da00cfc426e7a27ba908e9c0a-removebg-preview-1-removebg-preview-300x184.png")
-
-    start_date, end_date = st.date_input(
-        label='Rentang Waktu',min_value=min_date,
+    st.header("Pilih Periode")
+    start_date = st.date_input(
+        label='Awal',min_value=min_date,
         max_value=max_date,
-        value=[min_date, max_date]
+        value=min_date,
     )
+    end_date = st.date_input(
+        label='Akhir',min_value=min_date,
+        max_value=max_date,
+        value=max_date,
+    )
+    if start_date > end_date:
+        [start_date, end_date] = [end_date, start_date]
+
 
 
 main_df = all_df[(all_df["order_purchase_timestamp"] >= str(start_date)) & 
                 (all_df["order_purchase_timestamp"] <= str(end_date))]
 
-st.header('Olist E-Commerce Dashboard :sparkles:')
 
+st.title('🛍️ Olist E-Commerce Dashboard')
 
 # Daily Orders
 def create_order_summaries_df(df):
@@ -52,30 +63,32 @@ def create_order_summaries_df(df):
 
 order_summaries_df = create_order_summaries_df(main_df)
 
-st.subheader('Daily Orders')
- 
-col1, col2 = st.columns(2)
- 
-with col1:
-    total_orders = order_summaries_df.order_count.sum()
-    st.metric("Total orders", value=total_orders)
+with st.container():
+    st.subheader('Daily Orders')
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        total_orders = order_summaries_df.order_count.sum()
+        st.metric("Total orders", value=total_orders)
 
-with col2:
-    total_revenue = format_currency(order_summaries_df.revenue.sum(), "AUD", locale='es_CO') 
-    st.metric("Total Revenue", value=total_revenue)
+    with col2:
+        total_revenue = format_currency(order_summaries_df.revenue.sum(), "AUD", locale='es_CO') 
+        st.metric("Total Revenue", value=total_revenue)
 
-fig, ax = plt.subplots(figsize=(20, 10))
-ax.plot(
-    order_summaries_df["order_purchase_timestamp"],
-    order_summaries_df["order_count"],
-    marker='o', 
-    linewidth=2,
-    color="#A0BAFF"
-)
-ax.tick_params(axis='y', labelsize=20)
-ax.tick_params(axis='x', labelsize=18)
+    fig, ax = plt.subplots(figsize=(20, 10))
+    ax.plot(
+        order_summaries_df["order_purchase_timestamp"],
+        order_summaries_df["order_count"],
+        marker='o', 
+        linewidth=2,
+        color="#A0BAFF"
+    )
+    ax.tick_params(axis='y', labelsize=20)
+    ax.tick_params(axis='x', labelsize=18)
 
-st.pyplot(fig)
+    st.pyplot(fig)
+# Daily Orders
 
 
 
@@ -92,30 +105,32 @@ def create_product_summaries_df(df):
 
 product_summaries_df = create_product_summaries_df(main_df)
 
-st.subheader("Best & Worst Performing Product")
+with st.container():
+    st.subheader("Best & Worst Performing Product")
 
-fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(32, 36))
- 
-colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+    fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(32, 36))
+    
+    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
 
-sns.barplot(x="sold", y="product_category", hue="product_category", legend=False, data=product_summaries_df.sort_values(by="sold", ascending=False).head(5), palette=colors, ax=ax[0])
-ax[0].set_ylabel("Product Category")
-ax[0].set_xlabel("Number of Sales", fontsize=35)
-ax[0].set_title("Best Performing Product", loc="center", fontsize=50)
-ax[0].tick_params(axis='y', labelsize=35)
-ax[0].tick_params(axis='x', labelsize=35)
+    sns.barplot(x="sold", y="product_category", hue="product_category", legend=False, data=product_summaries_df.sort_values(by="sold", ascending=False).head(5), palette=colors, ax=ax[0])
+    ax[0].set_ylabel("Product Category")
+    ax[0].set_xlabel("Number of Sales", fontsize=35)
+    ax[0].set_title("Best Performing Product", loc="center", fontsize=50)
+    ax[0].tick_params(axis='y', labelsize=35)
+    ax[0].tick_params(axis='x', labelsize=35)
 
-sns.barplot(x="sold", y="product_category", hue="product_category", legend=False, data=product_summaries_df.sort_values(by="sold", ascending=True).head(5), palette=colors, ax=ax[1])
-ax[1].set_ylabel("Product Category")
-ax[1].set_xlabel("Number of Sales", fontsize=35)
-ax[1].invert_xaxis()
-ax[1].yaxis.set_label_position("right")
-ax[1].yaxis.tick_right()
-ax[1].set_title("Worst Performing Product", loc="center", fontsize=50)
-ax[1].tick_params(axis='y', labelsize=35)
-ax[1].tick_params(axis='x', labelsize=35)
- 
-st.pyplot(fig)
+    sns.barplot(x="sold", y="product_category", hue="product_category", legend=False, data=product_summaries_df.sort_values(by="sold", ascending=True).head(5), palette=colors, ax=ax[1])
+    ax[1].set_ylabel("Product Category")
+    ax[1].set_xlabel("Number of Sales", fontsize=35)
+    ax[1].invert_xaxis()
+    ax[1].yaxis.set_label_position("right")
+    ax[1].yaxis.tick_right()
+    ax[1].set_title("Worst Performing Product", loc="center", fontsize=50)
+    ax[1].tick_params(axis='y', labelsize=35)
+    ax[1].tick_params(axis='x', labelsize=35)
+    
+    st.pyplot(fig)
+# Best & Worst Performing Product
 
 
 
@@ -146,15 +161,17 @@ def vis_data(s, S, title):
     ax.set_title(title)
     st.pyplot(fig)
 
-st.subheader("Customer Demographics")
+with st.container():
+    st.subheader("Customer Demographics")
 
-col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-with col1:
-    vis_data("state", "State", "Customers Count by State") 
+    with col1:
+        vis_data("state", "State", "Customers Count by State") 
 
-with col2:
-    vis_data("city", "City", "Customers Count by City") 
+    with col2:
+        vis_data("city", "City", "Customers Count by City") 
+# Customer Demographics
  
 
 
@@ -181,46 +198,48 @@ def create_rfm_df(df):
 
 rfm_df = create_rfm_df(main_df)
 
-st.subheader("Best Customer Based on RFM Parameters")
+with st.container():
+    st.subheader("Best Customer Based on RFM Parameters")
 
-col1, col2, col3 = st.columns(3)
- 
-with col1:
-    avg_recency = round(rfm_df.recency.mean(), 1)
-    st.metric("Average Recency (days)", value=avg_recency)
- 
-with col2:
-    avg_frequency = round(rfm_df.frequency.mean(), 2)
-    st.metric("Average Frequency", value=avg_frequency)
- 
-with col3:
-    avg_frequency = format_currency(rfm_df.monetary.mean(), "AUD", locale='es_CO') 
-    st.metric("Average Monetary", value=avg_frequency)
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        avg_recency = round(rfm_df.recency.mean(), 1)
+        st.metric("Average Recency (days)", value=avg_recency)
+    
+    with col2:
+        avg_frequency = round(rfm_df.frequency.mean(), 2)
+        st.metric("Average Frequency", value=avg_frequency)
+    
+    with col3:
+        avg_frequency = format_currency(rfm_df.monetary.mean(), "AUD", locale='es_CO') 
+        st.metric("Average Monetary", value=avg_frequency)
 
-fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(25, 10))
-colors = ["#90CAF9", "#90CAF9", "#90CAF9", "#90CAF9", "#90CAF9"]
- 
-sns.barplot(y="recency", hue="customer_id", data=rfm_df.sort_values(by="recency", ascending=True).head(5), palette=colors, ax=ax[0])
-ax[0].set_ylabel(None)
-ax[0].set_xlabel("customer_id", fontsize=32)
-ax[0].set_title("By Recency (days)", loc="center", fontsize=42)
-ax[0].tick_params(axis='y', labelsize=32)
-ax[0].tick_params(axis='x', labelsize=35)
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(25, 10))
+    colors = ["#90CAF9", "#90CAF9", "#90CAF9", "#90CAF9", "#90CAF9"]
+    
+    sns.barplot(y="recency", hue="customer_id", data=rfm_df.sort_values(by="recency", ascending=True).head(5), palette=colors, ax=ax[0])
+    ax[0].set_ylabel(None)
+    ax[0].set_xlabel("customer_id", fontsize=32)
+    ax[0].set_title("By Recency (days)", loc="center", fontsize=42)
+    ax[0].tick_params(axis='y', labelsize=32)
+    ax[0].tick_params(axis='x', labelsize=35)
 
-sns.barplot(y="frequency", hue="customer_id", data=rfm_df.sort_values(by="frequency", ascending=False).head(5), palette=colors, ax=ax[1])
-ax[1].set_ylabel(None)
-ax[1].set_xlabel("customer_id", fontsize=32)
-ax[1].set_title("By Frequency", loc="center", fontsize=42)
-ax[1].tick_params(axis='y', labelsize=32)
-ax[1].tick_params(axis='x', labelsize=35)
+    sns.barplot(y="frequency", hue="customer_id", data=rfm_df.sort_values(by="frequency", ascending=False).head(5), palette=colors, ax=ax[1])
+    ax[1].set_ylabel(None)
+    ax[1].set_xlabel("customer_id", fontsize=32)
+    ax[1].set_title("By Frequency", loc="center", fontsize=42)
+    ax[1].tick_params(axis='y', labelsize=32)
+    ax[1].tick_params(axis='x', labelsize=35)
 
-sns.barplot(y="monetary", hue="customer_id", data=rfm_df.sort_values(by="monetary", ascending=False).head(5), palette=colors, ax=ax[2])
-ax[2].set_ylabel(None)
-ax[2].set_xlabel("customer_id", fontsize=32)
-ax[2].set_title("By Monetary", loc="center", fontsize=42)
-ax[2].tick_params(axis='y', labelsize=32)
-ax[2].tick_params(axis='x', labelsize=35)
- 
-st.pyplot(fig)
- 
-st.caption('Made by [Fikri Rivandi](https://freack21.github.io) with <3')
+    sns.barplot(y="monetary", hue="customer_id", data=rfm_df.sort_values(by="monetary", ascending=False).head(5), palette=colors, ax=ax[2])
+    ax[2].set_ylabel(None)
+    ax[2].set_xlabel("customer_id", fontsize=32)
+    ax[2].set_title("By Monetary", loc="center", fontsize=42)
+    ax[2].tick_params(axis='y', labelsize=32)
+    ax[2].tick_params(axis='x', labelsize=35)
+    
+    st.pyplot(fig)
+# RMF
+
+st.caption('Made by [Fikri Rivandi](https://freack21.github.io) with ❤️')

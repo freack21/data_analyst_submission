@@ -8,19 +8,19 @@ Data yang akan dianalisis adalah data dari perusahan **Olist E-Commerce** yang b
 
 Untuk menjawab pertanyaan-pertanyaan diatas, proyek ini akan menjawabnya untuk anda.
 
-> **Link Dashboard**: [https://data-analyst-submission.streamlit.app](https://data-analyst-submission.streamlit.app/)
+> **Live Dashboard**: [https://data-analyst-submission.streamlit.app](https://data-analyst-submission.streamlit.app/)
 
-## Setup Environment - Shell/Terminal
+## Setup Environment (Shell/Terminal)
 
 ```
 git clone https://github.com/freack21/data_analyst_submission.git
 cd data_analyst_submission
 pipenv install
+pipenv shell
 ```
 
-## Run Dashboard Web App (Streamlit)
+## Run Dashboard (Streamlit)
 
 ```
-cd dashboard
-streamlit run dashboard.py
+streamlit run ./dashboard/dashboard.py
 ```
