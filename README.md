@@ -18,7 +18,7 @@ cd data_analyst_submission
 pipenv install
 ```
 
-## Run steamlit app
+## Run Dashboard Web App (Streamlit)
 
 ```
 cd dashboard
